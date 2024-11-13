@@ -4,16 +4,24 @@ on:
     tags:
       - "*"
 jobs:
-  create-pr:
-    name: Create PR
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Create release
+        run: gh release create "${TAG}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+      - name: Create branch to release
+        run: git switch -c "release/$(date +%s)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create PR
-        run: gh pr create --base "${BASE}" --head "${HEAD}" --title "${TITLE}" --body "${BODY}" || true
+        run: gh pr create --base "${BASE}" --title "${TITLE}" --body "${BODY}" || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE: deployment/production
-          HEAD: main
-          TITLE: "Release"
-          BODY: ""
+          TITLE: "Release ${{ github.ref_name }}"
+          BODY: "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
