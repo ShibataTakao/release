@@ -14,14 +14,18 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
       - name: Create release
         run: gh release create "${TAG}" --generate-notes
         env:
           TAG: ${{ github.ref_name }}
       - name: Create branch
         run: |
-          git switch -c "release/$(date +%s)"
+          git switch -c "${BRANCH}"
           git push origin HEAD
+        env:
+          BRANCH: "release/${{ github.ref_name }}"
       - name: Create PR
         run: gh pr create --base "${BASE}" --title "${TITLE}" --body "${BODY}" || true
         env:
