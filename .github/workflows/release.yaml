@@ -1,0 +1,30 @@
+name: Release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release
+        run: gh release create "${TAG}" --generate-notes
+        env:
+          TAG: ${{ github.ref_name }}
+      - name: Create branch
+        run: |
+          git switch -c "release/$(date +%s)"
+          git push origin HEAD
+      - name: Create PR
+        run: gh pr create --base "${BASE}" --title "${TITLE}" --body "${BODY}" || true
+        env:
+          BASE: deployment/production
+          TITLE: "Release ${{ github.ref_name }}"
+          BODY: "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
