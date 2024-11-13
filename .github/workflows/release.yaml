@@ -1,0 +1,19 @@
+name: Release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  create-pr:
+    name: Create PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create PR
+        run: gh pr create --base "${BASE}" --head "${HEAD}" --title "${TITLE}" --body "${BODY}" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: deployment/production
+          HEAD: main
+          TITLE: "Release"
+          BODY: ""
