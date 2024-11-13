@@ -22,8 +22,10 @@ jobs:
           TAG: ${{ github.ref_name }}
       - name: Create branch
         run: |
-          git switch -c "release/$(date +%s)"
+          git switch -c "${BRANCH}"
           git push origin HEAD
+        env:
+          BRANCH: "release/${{ github.ref_name }}"
       - name: Create PR
         run: gh pr create --base "${BASE}" --title "${TITLE}" --body "${BODY}" || true
         env:
